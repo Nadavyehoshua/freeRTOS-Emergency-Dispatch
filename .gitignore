@@ -1,0 +1,37 @@
+# Build artifacts
+build/
+*.o
+*.d
+*.a
+*.so
+*.exe
+
+# Claude Code metadata
+.claude/
+
+# FreeRTOS generated files
+*.dump
+Trace.dump
+gmon.out
+*.out
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Dependency files
+*.dep
+
+# Core dumps
+core
+core.*
+
+# Profile data
+prof_*.txt
