@@ -1,202 +1,114 @@
+/**
+ * @file main.c
+ * @brief Main initialization and configuration for City Emergency Dispatch System
+ *
+ * This file contains the main entry point and system initialization including:
+ * - Global variable declarations (queues, semaphores, task handles)
+ * - Queue creation for inter-task communication
+ * - Semaphore creation for resource management
+ * - Task creation for all system components
+ * - FreeRTOS scheduler startup
+ *
+ * @author Nadav
+ * @date 2026
+ */
+
 #include "FreeRTOS.h"
 #include "task.h"
 #include <stdio.h>
 #include "init.h"
 #include "emergency_dispatch.h"
 #include "semphr.h"
+#include "tasks.h"
 
-// Define your stack size
+/* ============================================================================
+ * Configuration
+ * ============================================================================
+ */
 #define TASK_STACK_SIZE  configMINIMAL_STACK_SIZE
 
-//resouces 
-int Police[NUM_POLICE];
-int Ambulance[NUM_AMBULANCE];
-int Fire[NUM_FIRE];
-int Covid[NUM_COVID];
+/* ============================================================================
+ * Global Variables
+ * ============================================================================
+ */
+
+/* Event counter for unique event IDs */
 int counter = 0;
-//handlers
+
+/* ============================================================================
+ * Task Handles
+ * ============================================================================
+ * Handles allow us to reference and control tasks after creation.
+ * Set to NULL initially, populated by xTaskCreate().
+ */
+
+/* Core System Tasks */
 TaskHandle_t Event_generator_handler = NULL;
 TaskHandle_t Logger_handler = NULL;
 TaskHandle_t Dispatcher_handler = NULL;
-TaskHandle_t Covid1_handler = NULL;
-TaskHandle_t Covid2_handler = NULL;
-TaskHandle_t Covid3_handler = NULL;
-TaskHandle_t Covid4_handler = NULL;
-TaskHandle_t Fire1_handler = NULL;
-TaskHandle_t Fire2_handler = NULL;
-TaskHandle_t Fire3_handler = NULL;
+
+/* Police Department Tasks (3 resources) */
 TaskHandle_t Police1_handler = NULL;
 TaskHandle_t Police2_handler = NULL;
 TaskHandle_t Police3_handler = NULL;
+
+/* Ambulance Department Tasks (4 resources) */
 TaskHandle_t Ambulance1_handler = NULL;
 TaskHandle_t Ambulance2_handler = NULL;
 TaskHandle_t Ambulance3_handler = NULL;
 TaskHandle_t Ambulance4_handler = NULL;
 
-QueueHandle_t xDispatcherQueue = NULL;
-QueueHandle_t xPoliceQueue = NULL;
-QueueHandle_t xFireQueue = NULL;
-QueueHandle_t xAmbulanceQueue = NULL;
-QueueHandle_t xCovidQueue = NULL;
-QueueHandle_t xLoggerQueue = NULL;
+/* Fire Department Tasks (3 resources) */
+TaskHandle_t Fire1_handler = NULL;
+TaskHandle_t Fire2_handler = NULL;
+TaskHandle_t Fire3_handler = NULL;
 
-SemaphoreHandle_t xPoliceSemaphore;
-SemaphoreHandle_t xAmbulanceSemaphore;
-SemaphoreHandle_t xFireSemaphore;
-SemaphoreHandle_t xCovidSemaphore;
-//tasks
-void Police1_task(void *pvParameters) {
-    Event_t event;
-    while(1) {
-        xQueueReceive(xPoliceQueue,&event,portMAX_DELAY);
-        xSemaphoreTake(xPoliceSemaphore,portMAX_DELAY);
-        xQueueSend(xLoggerQueue,&event,portMAX_DELAY);
-        vTaskDelay(1000 + rand() % 2000);
-        xSemaphoreGive(xPoliceSemaphore);
-    }
-}
-void Police2_task(void *pvParameters) {
-    Event_t event;
-    while(1) {
-        xQueueReceive(xPoliceQueue,&event,portMAX_DELAY);
+/* COVID Department Tasks (4 resources) */
+TaskHandle_t Covid1_handler = NULL;
+TaskHandle_t Covid2_handler = NULL;
+TaskHandle_t Covid3_handler = NULL;
+TaskHandle_t Covid4_handler = NULL;
 
-    }
-}
-void Police3_task(void *pvParameters) {
-    Event_t event;
-    while(1) {
-        xQueueReceive(xPoliceQueue,&event,portMAX_DELAY);
+/* ============================================================================
+ * Queue Handles
+ * ============================================================================
+ * Queues provide thread-safe inter-task communication.
+ * Messages (Event_t structures) are passed between tasks via queues.
+ */
 
-    }
-}
-void Ambulance1_task(void *pvParameters) {
-    Event_t event;
-    while(1) {
-        xQueueReceive(xAmbulanceQueue,&event,portMAX_DELAY);
+QueueHandle_t xDispatcherQueue = NULL;   /* Central queue for all incoming events */
+QueueHandle_t xPoliceQueue = NULL;       /* Police department event queue */
+QueueHandle_t xFireQueue = NULL;         /* Fire department event queue */
+QueueHandle_t xAmbulanceQueue = NULL;    /* Ambulance department event queue */
+QueueHandle_t xCovidQueue = NULL;        /* COVID department event queue */
+QueueHandle_t xLoggerQueue = NULL;       /* Logger queue for completed events */
 
-    }
-}
-void Ambulance2_task(void *pvParameters) {
-    Event_t event;
-    while(1) {
-        xQueueReceive(xAmbulanceQueue,&event,portMAX_DELAY);
+/* ============================================================================
+ * Semaphore Handles
+ * ============================================================================
+ * Counting semaphores manage limited resources for each department.
+ * Initial count = max count = number of available resources.
+ */
 
-    }
-}
-void Ambulance3_task(void *pvParameters) {
-    Event_t event;
-    while(1) {
-        xQueueReceive(xAmbulanceQueue,&event,portMAX_DELAY);
+SemaphoreHandle_t xPoliceSemaphore;      /* Police resources (3 units) */
+SemaphoreHandle_t xAmbulanceSemaphore;   /* Ambulance resources (4 units) */
+SemaphoreHandle_t xFireSemaphore;        /* Fire resources (3 units) */
+SemaphoreHandle_t xCovidSemaphore;       /* COVID resources (4 units) */
 
-    }
-}
-
-void Ambulance4_task(void *pvParameters) {
-    Event_t event;
-    while(1) {
-        xQueueReceive(xAmbulanceQueue,&event,portMAX_DELAY);
-
-    }
-}
-
-void Fire1_task(void *pvParameters) {
-    Event_t event;
-    while(1) {
-        xQueueReceive(xFireQueue,&event,portMAX_DELAY);
-
-    }
-}
-void Fire2_task(void *pvParameters) {
-    Event_t event;
-    while(1) {
-        xQueueReceive(xFireQueue,&event,portMAX_DELAY);
-
-    }
-}
- void Fire3_task(void *pvParameters) {
-    Event_t event;
-    while(1) {
-        xQueueReceive(xFireQueue,&event,portMAX_DELAY);
-
-    }
-}
-void Covid1_task(void *pvParameters) {
-    Event_t event;
-    while(1) {
-        xQueueReceive(xCovidQueue,&event,portMAX_DELAY);
-
-    }
-}
-void Covid2_task(void *pvParameters) {
-    Event_t event;
-    while(1) {
-        xQueueReceive(xCovidQueue,&event,portMAX_DELAY);
-
-    }
-}
-void Covid3_task(void *pvParameters) {
-    Event_t event;
-    while(1) {
-        xQueueReceive(xCovidQueue,&event,portMAX_DELAY);
-
-    }
-}
-void Covid4_task(void *pvParameters) {
-    Event_t event;
-    while(1) {
-        xQueueReceive(xCovidQueue,&event,portMAX_DELAY);
-
-    }
-}
-void Dispatcher_task(void *pvParameters){
-            Event_t event;
-
-    while (1)
-    {
-        xQueueReceive(xDispatcherQueue,&event,portMAX_DELAY);
-        printf("Event_id = %d\n",event.event_id);
-        switch(event.event_type){
-            case EVENT_POLICE:
-                xQueueSend(xPoliceQueue,&event,portMAX_DELAY);
-            break;
-            case EVENT_AMBULANCE:
-                xQueueSend(xAmbulanceQueue,&event,portMAX_DELAY);
-            break;
-            case EVENT_FIRE:
-                xQueueSend(xFireQueue,&event,portMAX_DELAY);
-            break;
-            case EVENT_COVID:
-                 xQueueSend(xCovidQueue,&event,portMAX_DELAY);
-            break;
-            default:
-            break;
-    }
-    }
-    
-    
-}
-void Logger_task(void *pvParameters){
-
-
-}
-void Event_generator_task(void *pvParameters){
-Event_t event;
-while(1){
-    event.event_id = counter++;
-    event.event_type = (rand() % 4 + 1);
-
-    xQueueSend(xDispatcherQueue,&event,portMAX_DELAY);
-
-    vTaskDelay(pdMS_TO_TICKS(1000 + rand() % 4000));
-}
-}
-
+/* ============================================================================
+ * Main Function
+ * ============================================================================
+ */
 
 int main(void) {
-    // Initialize FreeRTOS
+    /* Initialize FreeRTOS platform-specific settings */
     init_main();
 
-    // Create Queues
+    /* ========================================================================
+     * Create Queues
+     * ========================================================================
+     * Queues allow tasks to communicate by passing Event_t structures.
+     */
     xDispatcherQueue = xQueueCreate(DISPATCHER_QUEUE_LENGTH, sizeof(Event_t));
     xPoliceQueue = xQueueCreate(POLICE_QUEUE_LENGTH, sizeof(Event_t));
     xAmbulanceQueue = xQueueCreate(AMBULANCE_QUEUE_LENGTH, sizeof(Event_t));
@@ -204,52 +116,64 @@ int main(void) {
     xCovidQueue = xQueueCreate(COVID_QUEUE_LENGTH, sizeof(Event_t));
     xLoggerQueue = xQueueCreate(LOGGER_QUEUE_LENGTH, sizeof(Event_t));
 
-    // Check if queues were created successfully
+    /* Verify all queues were created successfully */
     if (xDispatcherQueue == NULL || xPoliceQueue == NULL ||
         xAmbulanceQueue == NULL || xFireQueue == NULL ||
         xCovidQueue == NULL || xLoggerQueue == NULL) {
         printf("ERROR: Failed to create queues!\n");
-        while(1); // Halt execution
+        while(1);  /* Halt execution */
     }
 
-    // Create Semaphores
+    /* ========================================================================
+     * Create Semaphores
+     * ========================================================================
+     * Counting semaphores track available resources for each department.
+     * Max count = initial count = number of resources available.
+     */
     xPoliceSemaphore = xSemaphoreCreateCounting(NUM_POLICE, NUM_POLICE);
     xAmbulanceSemaphore = xSemaphoreCreateCounting(NUM_AMBULANCE, NUM_AMBULANCE);
     xFireSemaphore = xSemaphoreCreateCounting(NUM_FIRE, NUM_FIRE);
     xCovidSemaphore = xSemaphoreCreateCounting(NUM_COVID, NUM_COVID);
 
-    // Check if semaphores were created successfully
+    /* Verify all semaphores were created successfully */
     if (xPoliceSemaphore == NULL || xAmbulanceSemaphore == NULL ||
         xFireSemaphore == NULL || xCovidSemaphore == NULL) {
         printf("ERROR: Failed to create semaphores!\n");
-        while(1); // Halt execution
+        while(1);  /* Halt execution */
     }
 
-    // Create Tasks
+    /* ========================================================================
+     * Create Tasks
+     * ========================================================================
+     * Create all FreeRTOS tasks with appropriate priorities:
+     *   Priority 4: Dispatcher (highest - must route events quickly)
+     *   Priority 3: Department resources (handle events)
+     *   Priority 2: COVID resources (lower priority events)
+     *   Priority 1: Event generator (generates work)
+     *   Priority 0: Logger (lowest - logs after completion)
+     */
     BaseType_t taskStatus;
 
-    // Create Dispatcher Task
+    /* Core System Tasks */
     taskStatus = xTaskCreate(Dispatcher_task, "Dispatcher", TASK_STACK_SIZE, NULL, 4, &Dispatcher_handler);
     if (taskStatus != pdPASS) {
         printf("ERROR: Failed to create Dispatcher task!\n");
         while(1);
     }
 
-    // Create Event Generator Task
     taskStatus = xTaskCreate(Event_generator_task, "Event_generator", TASK_STACK_SIZE, NULL, 1, &Event_generator_handler);
     if (taskStatus != pdPASS) {
         printf("ERROR: Failed to create Event Generator task!\n");
         while(1);
     }
 
-    // Create Logger Task
     taskStatus = xTaskCreate(Logger_task, "Logger", TASK_STACK_SIZE, NULL, 0, &Logger_handler);
     if (taskStatus != pdPASS) {
         printf("ERROR: Failed to create Logger task!\n");
         while(1);
     }
 
-    // Create Police Tasks
+    /* Police Department Tasks (3 resources) */
     taskStatus = xTaskCreate(Police1_task, "Police-1", TASK_STACK_SIZE, NULL, 3, &Police1_handler);
     if (taskStatus != pdPASS) {
         printf("ERROR: Failed to create Police1 task!\n");
@@ -268,7 +192,7 @@ int main(void) {
         while(1);
     }
 
-    // Create Ambulance Tasks
+    /* Ambulance Department Tasks (4 resources) */
     taskStatus = xTaskCreate(Ambulance1_task, "Ambulance-1", TASK_STACK_SIZE, NULL, 3, &Ambulance1_handler);
     if (taskStatus != pdPASS) {
         printf("ERROR: Failed to create Ambulance1 task!\n");
@@ -293,7 +217,7 @@ int main(void) {
         while(1);
     }
 
-    // Create Fire Tasks
+    /* Fire Department Tasks (3 resources) */
     taskStatus = xTaskCreate(Fire1_task, "Fire-1", TASK_STACK_SIZE, NULL, 3, &Fire1_handler);
     if (taskStatus != pdPASS) {
         printf("ERROR: Failed to create Fire1 task!\n");
@@ -312,7 +236,7 @@ int main(void) {
         while(1);
     }
 
-    // Create COVID Tasks
+    /* COVID Department Tasks (4 resources) */
     taskStatus = xTaskCreate(Covid1_task, "Covid-1", TASK_STACK_SIZE, NULL, 2, &Covid1_handler);
     if (taskStatus != pdPASS) {
         printf("ERROR: Failed to create Covid1 task!\n");
@@ -337,15 +261,20 @@ int main(void) {
         while(1);
     }
 
+    /* All resources created successfully */
     printf("All queues, semaphores, and tasks created successfully!\n");
 
-    // Start the FreeRTOS scheduler
+    /* ========================================================================
+     * Start FreeRTOS Scheduler
+     * ========================================================================
+     * This function starts the FreeRTOS kernel and begins task execution.
+     * It should NEVER return if successful.
+     */
     vTaskStartScheduler();
 
-    // Should never reach here if scheduler starts successfully
+    /* Should never reach here if scheduler starts successfully */
     printf("ERROR: Scheduler failed to start!\n");
     while(1);
 
     return 0;
 }
-
