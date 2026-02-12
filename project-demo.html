@@ -220,23 +220,109 @@
         }
 
         .code-block {
-            background: #1e1e1e;
-            color: #d4d4d4;
-            padding: 20px;
-            border-radius: 10px;
+            background: #282c34;
+            color: #abb2bf;
+            padding: 25px;
+            border-radius: 12px;
             overflow-x: auto;
             margin: 20px 0;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-            line-height: 1.5;
-            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+            font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+            font-size: 0.95em;
+            line-height: 1.8;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid #3e4451;
+            position: relative;
         }
 
-        .code-block .keyword { color: #569cd6; }
-        .code-block .string { color: #ce9178; }
-        .code-block .comment { color: #6a9955; }
-        .code-block .function { color: #dcdcaa; }
-        .code-block .type { color: #4ec9b0; }
+        .code-header {
+            background: #21252b;
+            color: #abb2bf;
+            padding: 10px 20px;
+            border-radius: 12px 12px 0 0;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.85em;
+            font-weight: 600;
+            border-bottom: 2px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .code-container {
+            background: #282c34;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .code-block .keyword { color: #c678dd; font-weight: bold; }
+        .code-block .string { color: #98c379; }
+        .code-block .comment { color: #5c6370; font-style: italic; }
+        .code-block .function { color: #61afef; }
+        .code-block .type { color: #e5c07b; }
+        .code-block .number { color: #d19a66; }
+
+        .file-tree {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.95em;
+            line-height: 1.8;
+            margin: 20px 0;
+            border: 2px solid #e9ecef;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .file-tree-line {
+            display: flex;
+            align-items: center;
+            padding: 4px 0;
+            transition: background 0.2s ease;
+        }
+
+        .file-tree-line:hover {
+            background: #e9ecef;
+            margin: 0 -10px;
+            padding: 4px 10px;
+            border-radius: 5px;
+        }
+
+        .tree-icon {
+            margin-right: 8px;
+            font-size: 1.1em;
+        }
+
+        .tree-indent {
+            display: inline-block;
+        }
+
+        .tree-branch {
+            color: #adb5bd;
+            margin-right: 8px;
+        }
+
+        .tree-folder {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .tree-file {
+            color: #495057;
+        }
+
+        .tree-comment {
+            color: #868e96;
+            margin-left: 10px;
+            font-style: italic;
+        }
+
+        .tree-line-count {
+            color: #667eea;
+            font-weight: 600;
+            margin-left: 5px;
+        }
 
         .timeline {
             position: relative;
@@ -539,11 +625,19 @@
 
         <!-- Code Example -->
         <section class="section scroll-fade">
-            <h2>💻 Code Highlight: Department Task</h2>
-            <div class="code-block">
+            <h2>💻 Code Highlights</h2>
+
+            <h3 style="margin-top: 20px;">Department Task Implementation</h3>
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="tree-icon">📄</span>
+                    <span>Src/tasks.c - Police Department Task</span>
+                </div>
+                <div class="code-block">
 <span class="keyword">void</span> <span class="function">Police1_task</span>(<span class="keyword">void</span> *pvParameters) {
     <span class="type">Event_t</span> event;
-    <span class="keyword">while</span>(<span class="keyword">1</span>) {
+
+    <span class="keyword">while</span>(<span class="number">1</span>) {
         <span class="comment">/* Wait for an event from the police queue */</span>
         <span class="function">xQueueReceive</span>(xPoliceQueue, &event, portMAX_DELAY);
 
@@ -551,13 +645,15 @@
         <span class="function">xSemaphoreTake</span>(xPoliceSemaphore, portMAX_DELAY);
 
         <span class="comment">/* Simulate handling the event (1-3 seconds) */</span>
-        <span class="type">uint32_t</span> duration_ms = <span class="keyword">1000</span> + <span class="function">rand</span>() % <span class="keyword">2000</span>;
-        <span class="function">printf</span>(<span class="string">"START: Police-1 handling event ID=[%lu]\n"</span>, event.event_id);
+        <span class="type">uint32_t</span> duration_ms = <span class="number">1000</span> + <span class="function">rand</span>() % <span class="number">2000</span>;
+        <span class="function">printf</span>(<span class="string">"START: Police-1 handling event ID=[%lu]\n"</span>,
+               (<span class="keyword">unsigned long</span>)event.event_id);
 
         <span class="function">vTaskDelay</span>(<span class="function">pdMS_TO_TICKS</span>(duration_ms));
 
         <span class="function">printf</span>(<span class="string">"COMPLETE: Police-1 finished event ID=[%lu] after %lums\n"</span>,
-               event.event_id, duration_ms);
+               (<span class="keyword">unsigned long</span>)event.event_id,
+               (<span class="keyword">unsigned long</span>)duration_ms);
 
         <span class="comment">/* Send event to logger for tracking */</span>
         <span class="function">xQueueSend</span>(xLoggerQueue, &event, portMAX_DELAY);
@@ -566,6 +662,65 @@
         <span class="function">xSemaphoreGive</span>(xPoliceSemaphore);
     }
 }
+                </div>
+            </div>
+
+            <h3 style="margin-top: 30px;">Event Structure Definition</h3>
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="tree-icon">📄</span>
+                    <span>Inc/emergency_dispatch.h - Event Data Structure</span>
+                </div>
+                <div class="code-block">
+<span class="comment">/**
+ * @brief Represents an emergency event in the system
+ */</span>
+<span class="keyword">typedef struct</span> {
+    <span class="type">uint8_t</span>  event_type;  <span class="comment">/* Type of emergency (1-4) */</span>
+    <span class="type">uint8_t</span>  priority;    <span class="comment">/* Priority level (1-3) */</span>
+    <span class="type">uint32_t</span> event_id;    <span class="comment">/* Unique event identifier */</span>
+} <span class="type">Event_t</span>;
+
+<span class="comment">/* Event Type Definitions */</span>
+<span class="keyword">#define</span> EVENT_POLICE    <span class="number">1</span>  <span class="comment">/* Police emergency */</span>
+<span class="keyword">#define</span> EVENT_AMBULANCE <span class="number">2</span>  <span class="comment">/* Medical emergency */</span>
+<span class="keyword">#define</span> EVENT_FIRE      <span class="number">3</span>  <span class="comment">/* Fire emergency */</span>
+<span class="keyword">#define</span> EVENT_COVID     <span class="number">4</span>  <span class="comment">/* COVID-19 emergency */</span>
+                </div>
+            </div>
+
+            <h3 style="margin-top: 30px;">Dispatcher Routing Logic</h3>
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="tree-icon">📄</span>
+                    <span>Src/tasks.c - Dispatcher Task</span>
+                </div>
+                <div class="code-block">
+<span class="keyword">void</span> <span class="function">Dispatcher_task</span>(<span class="keyword">void</span> *pvParameters) {
+    <span class="type">Event_t</span> event;
+
+    <span class="keyword">while</span> (<span class="number">1</span>) {
+        <span class="comment">/* Receive event from central dispatcher queue */</span>
+        <span class="function">xQueueReceive</span>(xDispatcherQueue, &event, portMAX_DELAY);
+
+        <span class="comment">/* Route event to appropriate department queue based on type */</span>
+        <span class="keyword">switch</span>(event.event_type) {
+            <span class="keyword">case</span> EVENT_POLICE:
+                <span class="function">xQueueSend</span>(xPoliceQueue, &event, portMAX_DELAY);
+                <span class="keyword">break</span>;
+            <span class="keyword">case</span> EVENT_AMBULANCE:
+                <span class="function">xQueueSend</span>(xAmbulanceQueue, &event, portMAX_DELAY);
+                <span class="keyword">break</span>;
+            <span class="keyword">case</span> EVENT_FIRE:
+                <span class="function">xQueueSend</span>(xFireQueue, &event, portMAX_DELAY);
+                <span class="keyword">break</span>;
+            <span class="keyword">case</span> EVENT_COVID:
+                <span class="function">xQueueSend</span>(xCovidQueue, &event, portMAX_DELAY);
+                <span class="keyword">break</span>;
+        }
+    }
+}
+                </div>
             </div>
         </section>
 
@@ -603,17 +758,152 @@
         <!-- File Structure -->
         <section class="section scroll-fade">
             <h2>📁 Project Structure</h2>
-            <div class="code-block">
-my-freertos-project/
-├── <span class="string">main.c</span>                      <span class="comment"># System initialization (280 lines)</span>
-├── <span class="string">Inc/</span>
-│   ├── <span class="string">emergency_dispatch.h</span>    <span class="comment"># Core definitions (72 lines)</span>
-│   └── <span class="string">tasks.h</span>                 <span class="comment"># Task declarations (74 lines)</span>
-├── <span class="string">Src/</span>
-│   └── <span class="string">tasks.c</span>                 <span class="comment"># All task implementations (446 lines)</span>
-├── <span class="string">core/</span>                       <span class="comment"># FreeRTOS kernel and libraries</span>
-├── <span class="string">Makefile</span>                    <span class="comment"># Build configuration</span>
-└── <span class="string">README.md</span>                   <span class="comment"># Project documentation</span>
+            <p style="margin-bottom: 20px;">Clean, modular architecture with clear separation of concerns:</p>
+
+            <div class="file-tree">
+                <div class="file-tree-line">
+                    <span class="tree-icon">📁</span>
+                    <span class="tree-folder">my-freertos-project/</span>
+                </div>
+
+                <div class="file-tree-line">
+                    <span class="tree-indent">│</span>
+                    <span class="tree-branch">├──</span>
+                    <span class="tree-icon">📄</span>
+                    <span class="tree-file">main.c</span>
+                    <span class="tree-comment">System initialization & main()</span>
+                    <span class="tree-line-count">(280 lines)</span>
+                </div>
+
+                <div class="file-tree-line">
+                    <span class="tree-indent">│</span>
+                    <span class="tree-branch">├──</span>
+                    <span class="tree-icon">📄</span>
+                    <span class="tree-file">Makefile</span>
+                    <span class="tree-comment">Build configuration</span>
+                </div>
+
+                <div class="file-tree-line">
+                    <span class="tree-indent">│</span>
+                    <span class="tree-branch">├──</span>
+                    <span class="tree-icon">📄</span>
+                    <span class="tree-file">README.md</span>
+                    <span class="tree-comment">Project documentation</span>
+                </div>
+
+                <div class="file-tree-line">
+                    <span class="tree-indent">│</span>
+                </div>
+
+                <div class="file-tree-line">
+                    <span class="tree-indent">│</span>
+                    <span class="tree-branch">├──</span>
+                    <span class="tree-icon">📁</span>
+                    <span class="tree-folder">Inc/</span>
+                    <span class="tree-comment">Header files</span>
+                </div>
+
+                <div class="file-tree-line">
+                    <span class="tree-indent">│   │</span>
+                    <span class="tree-branch">├──</span>
+                    <span class="tree-icon">📄</span>
+                    <span class="tree-file">emergency_dispatch.h</span>
+                    <span class="tree-comment">Core definitions & constants</span>
+                    <span class="tree-line-count">(72 lines)</span>
+                </div>
+
+                <div class="file-tree-line">
+                    <span class="tree-indent">│   │</span>
+                    <span class="tree-branch">└──</span>
+                    <span class="tree-icon">📄</span>
+                    <span class="tree-file">tasks.h</span>
+                    <span class="tree-comment">Task function declarations</span>
+                    <span class="tree-line-count">(74 lines)</span>
+                </div>
+
+                <div class="file-tree-line">
+                    <span class="tree-indent">│</span>
+                </div>
+
+                <div class="file-tree-line">
+                    <span class="tree-indent">│</span>
+                    <span class="tree-branch">├──</span>
+                    <span class="tree-icon">📁</span>
+                    <span class="tree-folder">Src/</span>
+                    <span class="tree-comment">Source files</span>
+                </div>
+
+                <div class="file-tree-line">
+                    <span class="tree-indent">│   │</span>
+                    <span class="tree-branch">└──</span>
+                    <span class="tree-icon">📄</span>
+                    <span class="tree-file">tasks.c</span>
+                    <span class="tree-comment">All task implementations</span>
+                    <span class="tree-line-count">(446 lines)</span>
+                </div>
+
+                <div class="file-tree-line">
+                    <span class="tree-indent">│</span>
+                </div>
+
+                <div class="file-tree-line">
+                    <span class="tree-indent">│</span>
+                    <span class="tree-branch">├──</span>
+                    <span class="tree-icon">📁</span>
+                    <span class="tree-folder">core/</span>
+                    <span class="tree-comment">FreeRTOS kernel & libraries</span>
+                </div>
+
+                <div class="file-tree-line">
+                    <span class="tree-indent">│   │</span>
+                    <span class="tree-branch">├──</span>
+                    <span class="tree-icon">📁</span>
+                    <span class="tree-folder">Source/</span>
+                    <span class="tree-comment">FreeRTOS kernel source</span>
+                </div>
+
+                <div class="file-tree-line">
+                    <span class="tree-indent">│   │</span>
+                    <span class="tree-branch">├──</span>
+                    <span class="tree-icon">📁</span>
+                    <span class="tree-folder">Common/</span>
+                    <span class="tree-comment">Demo tasks & utilities</span>
+                </div>
+
+                <div class="file-tree-line">
+                    <span class="tree-indent">│   │</span>
+                    <span class="tree-branch">└──</span>
+                    <span class="tree-icon">📁</span>
+                    <span class="tree-folder">FreeRTOS-Plus/</span>
+                    <span class="tree-comment">Additional components</span>
+                </div>
+
+                <div class="file-tree-line">
+                    <span class="tree-indent">│</span>
+                </div>
+
+                <div class="file-tree-line">
+                    <span class="tree-branch">└──</span>
+                    <span class="tree-icon">📁</span>
+                    <span class="tree-folder">build/</span>
+                    <span class="tree-comment">Build artifacts (generated)</span>
+                </div>
+
+                <div class="file-tree-line" style="margin-left: 20px;">
+                    <span class="tree-branch">└──</span>
+                    <span class="tree-icon">⚙️</span>
+                    <span class="tree-file">posix_demo</span>
+                    <span class="tree-comment">Executable binary</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; padding: 15px; background: #e7f3ff; border-left: 4px solid #2196F3; border-radius: 5px;">
+                <strong>📊 Project Statistics:</strong><br>
+                • Total Lines of Code: ~800 lines<br>
+                • Source Files: 4 main files (.c/.h)<br>
+                • Tasks: 17 (14 department + 3 core)<br>
+                • Queues: 6 message queues<br>
+                • Semaphores: 4 counting semaphores
             </div>
         </section>
 
