@@ -55,12 +55,6 @@ void MyNewTask(void *pvParameters) {
 xTaskCreate(MyNewTask, "MyTask", TASK_STACK_SIZE, NULL, 1, NULL);
 ```
 
-## Important Notes
-
-- Stack size is set to `configMINIMAL_STACK_SIZE` - adjust if needed
-- The trace recorder stack monitor is disabled (fixes 64-bit bug)
-- Use mutexes/semaphores for inter-task communication
-
 ## License
 
 See core/FreeRTOS-License/ for FreeRTOS licensing.
